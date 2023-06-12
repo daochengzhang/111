@@ -1,0 +1,182 @@
+---
+title: "sta 141a HW2"
+output: html_document
+---
+
+Daocheng Zhang
+918331476
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+```
+
+
+1.
+```{r}
+dim(iris)
+head(iris)
+```
+
+This dataset is a build-in dataset. It shows the speal length, with, petal length, and width for fifty flowers from three species of iris. This dataset is interesting because it is a well-known and widely used dataset in the field of statistics and machine learning. It gives detailed data of different flowers. 
+
+
+
+2.
+(i)
+```{r}
+
+
+dim(flights)
+```
+There are 336776 observations and 19 variables
+
+(ii)
+**tailnum** means the plane tail number.
+**flight** means the flight number.
+**carrier** means two letter carrier abbreviation.
+**dep_delay** and **arr_delay** represent departure and arrival delays. If the number is negative, it represents early departures or arrivals.
+
+(iii)
+**visib** means visibility in miles.
+**time_hour** means the date and hour
+**temp** means temperature in F
+
+
+3.
+```{r}
+
+library(tidyverse)
+
+alaska_flights <- data.frame(flights %>% filter( carrier=='AS'))
+early_january_weather<- data.frame(weather%>% filter(origin=='EWR', month=="1"))
+
+```
+
+
+4.
+```{r}
+plot(x=alaska_flights$dep_delay,y=alaska_flights$arr_delay, 
+     xlab= "dep_delay", 
+     ylab= "arr_delay",
+     pch=16,
+     col= alpha("black", alpha = 1) )
+     
+```
+We could notice that dep_delay and arr_delay are positive corelated. The reason is that when the departure is delayed, arrival is also delayed, if the flight time remains same. 
+
+
+
+
+5.
+```{r}
+plot(x=alaska_flights$dep_delay,y=alaska_flights$arr_delay, 
+     xlab= "dep_delay", 
+     ylab= "arr_delay",
+     pch=16,
+     col= alpha("black", alpha = 0.2) )
+     
+```
+By comparing two plots, we could notice that the color of each dot in the second plot is lighter. Therefore, it is easier to find out where all points concentrate. 
+
+
+6.
+```{r}
+
+plot(x= early_january_weather$time_hour, y=early_january_weather$temp, 
+     xlab = "time_hour",
+     ylab= "temp",
+     type="l")
+```
+From Jan 21 to 28, the tempterature drops significantly. 
+
+7.
+```{r}
+set.seed(1)
+n=100
+x<- c(runif(n,min=-2,max=2))
+z<- c(rnorm(n,mean=0,sd=sqrt(0.5)))
+e<- c(rnorm(n,mean=0,sd=sqrt(1)))
+beta.true=c(1,2,1)
+y<- x*beta.true[1] + beta.true[2]*z + beta.true[3]*x*z + e
+lm(y ~x)
+```
+8.
+```{r}
+simulate<- function(x,beta.true,z){
+  x<- c(runif(n,min=-2,max=2))
+  z<- c(rnorm(n,mean=0,sd=sqrt(0.5)))
+  e<- c(rnorm(n,mean=0,sd=sqrt(1)))
+  beta.true=c(1,2,1)
+  y<- x*beta.true[1] + beta.true[2]*z + beta.true[3]*x*z +  e
+  lm(y ~ x)
+  return(lm(y~x)$coef[2])
+}
+N.sim=5000;
+set.seed(1)
+n=100;
+beta.true=c(1,2,1)
+sim= replicate(N.sim,simulate(x,beta.true,z))
+sim.mean= mean(sim)
+result<- data.frame(sim)
+ggplot(result, aes(x = sim)) +
+  geom_histogram(binwidth = 0.05, color = "black", fill = "white")+
+  geom_vline(xintercept = sim.mean, color = "black",linewidth = 1, linetype = "solid") +
+  geom_vline(xintercept = 1, color = "red", linewidth = 1,linetype = "dashed")+
+  labs(x = "Coefficient", y = "Frequency")
+
+```
+It is easily to notice that our simulation mean is very close to the true value.
+
+
+9.
+```{r}
+print(sim.mean)
+simulate<- function(x,beta.true,z){
+  x<- c(runif(n,min=-2,max=2))
+  z<- c(rnorm(n,mean=0,sd=sqrt(0.5)))
+  e<- c(rnorm(n,mean=0,sd=sqrt(1)))
+  beta.true=c(1,2,1)
+  y<- x*beta.true[1] + beta.true[2]*z + beta.true[3]*x*z +  e
+  lm(y ~ x)
+  return(lm(y~x)$coef[2])
+}
+N.sim=4000;
+set.seed(1)
+n=100;
+beta.true=c(1,2,1)
+sim= replicate(N.sim,simulate(x,beta.true,z))
+sim.mean= mean(sim)
+print(sim.mean)
+```
+Both of them have very similar mean.
+
+
+10.
+```{r}
+simulate<- function(x,beta.true,z){
+  x<- c(runif(n,min=-2,max=2))
+  e_hat<- c(rnorm(n,mean=0,sd=sqrt(0.5)))
+  z<- x+1+e_hat
+  e<- c(rnorm(n,mean=0,sd=sqrt(1)))
+  y<- x*beta.true[1] + beta.true[2]*z  + e
+  lm(y ~ x)
+  return(lm(y~x)$coef[2])
+}
+N.sim=5000
+n=100
+beta.true=c(1,2)
+sim= replicate(N.sim,simulate(x,beta.true,z))
+sim.mean= mean(sim)
+print(sim.mean)
+```
+Therefore, the estimator for the coefficient of x is not unbiased.
+
+
+#### **Acknowledgement**
+Using Chatgpt, I learned how to change the transparency in problem 4 and 5.I also learned how to draw the histogram in problem 8.
+https://openai.com/blog/chatgpt
+
+
+For problem 6, I draw a linegraph using the content from Math Insight
+https://mathinsight.org/image/r_line_graph_1 
